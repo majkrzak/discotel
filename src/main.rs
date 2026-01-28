@@ -34,8 +34,8 @@ impl RawEventHandler for Handler {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt().init();
     dotenv().ok();
+    tracing_subscriber::fmt().init();
 
     let config = envy::from_env::<Config>()?;
 
