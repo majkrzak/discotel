@@ -1,7 +1,11 @@
 [package]
 name = "discotel"
+version = "0.0.0"
 edition = "2024"
 
 [dependencies]
+dotenv = "0.15.0"
+envy = "0.4.2"
+serde = { version = "1.0.228", features = ["derive", "rc"] }
 serenity = "0.12.5"
 tokio = { version = "1.49.0", features = ["macros", "rt-multi-thread"] }
