@@ -1,0 +1,5 @@
+[package]
+name = "discotel"
+edition = "2024"
+
+[dependencies]

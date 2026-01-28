@@ -1,0 +1,1 @@
+# discotel – Discord OpenTelemetry Exporter
