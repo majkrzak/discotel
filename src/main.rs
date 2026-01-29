@@ -1,17 +1,17 @@
 use dotenv::dotenv;
-use opentelemetry::logs::{LogRecord, Logger, LoggerProvider};
-use opentelemetry_otlp::{Protocol, WithExportConfig};
+use opentelemetry::logs::{LogRecord, Logger, LoggerProvider, Severity};
+use opentelemetry_otlp::LogExporter;
 use opentelemetry_sdk::logs::{SdkLogger, SdkLoggerProvider};
 use serde::Deserialize;
 use serenity::{
     all::{ClientBuilder, Context, Event, GatewayIntents, RawEventHandler},
     async_trait,
 };
+use std::time::SystemTime;
 
 #[derive(Deserialize, Debug, Clone)]
 struct Config {
     discord_token: String,
-    otel_url: String,
 }
 
 struct Handler {
@@ -21,14 +21,11 @@ struct Handler {
 #[async_trait]
 impl RawEventHandler for Handler {
     async fn raw_event(&self, _ctx: Context, ev: Event) {
-        let logger = self.logger.clone();
-        let mut log_entry = logger.create_log_record();
+        let mut log_entry = self.logger.create_log_record();
+        log_entry.set_severity_number(Severity::Trace);
+        log_entry.set_observed_timestamp(SystemTime::now());
         log_entry.set_body(serde_json::to_string(&ev).unwrap().into());
-        tokio::task::spawn_blocking(move || {
-            logger.emit(log_entry);
-        })
-        .await
-        .unwrap();
+        self.logger.emit(log_entry);
     }
 }
 
@@ -39,17 +36,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = envy::from_env::<Config>()?;
 
-    let exporter = opentelemetry_otlp::LogExporter::builder()
-        .with_http()
-        .with_protocol(Protocol::HttpJson)
-        .with_endpoint(config.otel_url)
-        .build()?;
-
-    let provider = SdkLoggerProvider::builder()
-        .with_simple_exporter(exporter)
-        .build();
-
-    let logger: opentelemetry_sdk::logs::SdkLogger = provider.logger("discolog");
+    let logger = SdkLoggerProvider::builder()
+        .with_batch_exporter(LogExporter::builder().with_http().build()?)
+        .build()
+        .logger("discolog");
 
     let mut client = ClientBuilder::new(config.discord_token, GatewayIntents::all())
         .raw_event_handler(Handler { logger })
