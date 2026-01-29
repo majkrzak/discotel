@@ -1,18 +1,13 @@
+use discotel::config::Config;
 use dotenv::dotenv;
 use opentelemetry::logs::{LogRecord, Logger, LoggerProvider, Severity};
 use opentelemetry_otlp::LogExporter;
 use opentelemetry_sdk::logs::{SdkLogger, SdkLoggerProvider};
-use serde::Deserialize;
 use serenity::{
     all::{ClientBuilder, Context, Event, GatewayIntents, RawEventHandler},
     async_trait,
 };
 use std::time::SystemTime;
-
-#[derive(Deserialize, Debug, Clone)]
-struct Config {
-    discord_token: String,
-}
 
 struct Handler {
     logger: SdkLogger,
