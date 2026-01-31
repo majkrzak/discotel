@@ -1,28 +1,9 @@
-use discotel::config::Config;
+use discotel::{config::Config, handler::Handler};
 use dotenv::dotenv;
-use opentelemetry::logs::{LogRecord, Logger, LoggerProvider, Severity};
+use opentelemetry::logs::LoggerProvider;
 use opentelemetry_otlp::LogExporter;
-use opentelemetry_sdk::logs::{SdkLogger, SdkLoggerProvider};
-use serenity::{
-    all::{ClientBuilder, Context, Event, GatewayIntents, RawEventHandler},
-    async_trait,
-};
-use std::time::SystemTime;
-
-struct Handler {
-    logger: SdkLogger,
-}
-
-#[async_trait]
-impl RawEventHandler for Handler {
-    async fn raw_event(&self, _ctx: Context, ev: Event) {
-        let mut log_entry = self.logger.create_log_record();
-        log_entry.set_severity_number(Severity::Trace);
-        log_entry.set_observed_timestamp(SystemTime::now());
-        log_entry.set_body(serde_json::to_string(&ev).unwrap().into());
-        self.logger.emit(log_entry);
-    }
-}
+use opentelemetry_sdk::logs::SdkLoggerProvider;
+use serenity::all::{ClientBuilder, GatewayIntents};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
