@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .logger("discolog");
 
     let mut client = ClientBuilder::new(config.discord_token, GatewayIntents::all())
-        .raw_event_handler(Handler{logger})
+        .raw_event_handler(Handler { logger })
         .await?;
 
     client.start().await?;
