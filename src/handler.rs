@@ -98,7 +98,7 @@ handlers! {
         channel_id = old.unwrap().channel_id.unwrap();
         channel_name = channel_id.name(ctx).await.unwrap();
     } in [
-        "@{user_name} left `#{channel_name}` voice channel",
+        "@{user_name} left `{channel_name}` voice channel",
         "guild.id" => new.guild_id.unwrap().to_string(),
         "user.id" => user.id.to_string(),
         "user.name" => user_name.to_string(),
