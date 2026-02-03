@@ -24,7 +24,7 @@ macro_rules! handlers {
 
         impl Handler {
             $(
-                async fn $event_name (&self, $ctx: Context, ev: FullEvent, now: SystemTime) {
+                async fn $event_name (&self, $ctx: Context, ev: FullEvent, now: SystemTime) -> Option<()> {
                     if let FullEvent::$event_kind { $( $arg_name $(: $arg_pat)? ),* } = ev {
                         $( if $test )? {
                             $(let $init_p = $init_e;)*
@@ -37,6 +37,7 @@ macro_rules! handlers {
                             self.logger.emit(log_record);
                         }
                     }
+                    Some(()) // TODO: Replace with result and proper error handling
                 }
             )*
         }
@@ -57,10 +58,10 @@ handlers! {
     if (true) let {
         user_name = new_message.author.display_name();
         channel_id = new_message.channel_id;
-        channel_name = channel_id.name(ctx).await.unwrap();
+        channel_name = channel_id.name(ctx).await.ok()?;
     } in [
         "@{user_name} sent message on #{channel_name}",
-        "guild.id" => new_message.guild_id.unwrap().to_string(),
+        "guild.id" => new_message.guild_id?.to_string(),
         "user.id" => new_message.author.id.to_string(),
         "user.name" => user_name.to_string(),
         "channel.id" => channel_id.to_string(),
@@ -71,16 +72,16 @@ handlers! {
     voice_channel_joined: VoiceStateUpdate => (ctx, old, new)
     if (
         old.is_none()
-        || new.channel_id.is_some() && new.channel_id.unwrap() != old.clone().unwrap().channel_id.unwrap()
+        || new.channel_id.is_some() && new.channel_id? != old.clone()?.channel_id?
     ) let {
-        member = new.member.unwrap();
+        member = new.member?;
         user = member.user;
         user_name = user.display_name();
-        channel_id = new.channel_id.unwrap();
-        channel_name = channel_id.name(ctx).await.unwrap();
+        channel_id = new.channel_id?;
+        channel_name = channel_id.name(ctx).await.ok()?;
     } in [
         "@{user_name} joined `{channel_name}` voice channel",
-        "guild.id" => new.guild_id.unwrap().to_string(),
+        "guild.id" => new.guild_id?.to_string(),
         "user.id" => user.id.to_string(),
         "user.name" => user_name.to_string(),
         "channel.id" => channel_id.to_string(),
@@ -90,16 +91,16 @@ handlers! {
     voice_channel_left: VoiceStateUpdate => (ctx, old, new)
     if (
         new.channel_id.is_none()
-        || old.is_some() && new.channel_id.unwrap() != old.clone().unwrap().channel_id.unwrap()
+        || old.is_some() && new.channel_id? != old.clone()?.channel_id?
     ) let {
-        member = new.member.unwrap();
+        member = new.member?;
         user = member.user;
         user_name = user.display_name();
-        channel_id = old.unwrap().channel_id.unwrap();
-        channel_name = channel_id.name(ctx).await.unwrap();
+        channel_id = old?.channel_id?;
+        channel_name = channel_id.name(ctx).await.ok()?;
     } in [
         "@{user_name} left `{channel_name}` voice channel",
-        "guild.id" => new.guild_id.unwrap().to_string(),
+        "guild.id" => new.guild_id?.to_string(),
         "user.id" => user.id.to_string(),
         "user.name" => user_name.to_string(),
         "channel.id" => channel_id.to_string(),
