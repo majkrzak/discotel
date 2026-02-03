@@ -18,5 +18,7 @@ Configuration is expected to be provided via the environment variables. For conv
 Discotel utilizes the OpenTelemtry SDK to some extent and therefore relies on subsets of the [OpenTelemetry General SDK Configuration](https://opentelemetry.io/docs/languages/sdk-configuration/general/) and [OpenTelemetry OTLP Exporter Configuration](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/) environment variables. In particular, the following ones will be useful:
 
 [`OTEL_SERVICE_NAME`](https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_service_name) – Name of the service. Emitted in `service.name` resource attribute. Required, for example, by Grafana Loki to properly index received logs.
+
 [`OTEL_EXPORTER_OTLP_ENDPOINT`](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#otel_exporter_otlp_endpoint) – Base HTTP base endpoint to export logs to.
+
 [`OTEL_EXPORTER_OTLP_LOGS_HEADERS`](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#otel_exporter_otlp_headers) – HTTP Headers sent with the logs. This may be used for authenticating the request.
