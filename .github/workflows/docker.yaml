@@ -57,3 +57,4 @@ jobs:
             podman manifest add ghcr.io/${{ github.repository }}:${{ github.sha }} containers-storage:$tag
           done
           podman manifest push --format=oci --all ghcr.io/${{ github.repository }}:${{ github.sha }}
+          podman manifest push --format=oci --all ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
