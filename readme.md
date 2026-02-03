@@ -1,4 +1,4 @@
-# discotel – Discord OpenTelemetry Exporter
+# Discord OpenTelemetry Exporter
 
 > [!WARNING]
 > The project is in its early stage. It may retain neither its current shape nor its features. Do not expect any backward compatibility, or, in fact, at this point, any compatibility at all.
