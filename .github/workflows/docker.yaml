@@ -1,0 +1,59 @@
+name: docker
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-linux
+            os: ubuntu-24.04
+          - target: aarch64-linux
+            os: ubuntu-24.04-arm
+    name: Build for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Cache Nix Store
+        uses: actions/cache@v4
+        with:
+          path: /nix/store/
+          key: ${{ matrix.target }}-nix-store
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ github.token }}
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Build Docker Image
+        run: nix build .#docker
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}-build
+          path: result
+  merge:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Downlad artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-build"
+      - name: Log in to ghcr.io
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          registry: ghcr.io/${{ github.repository_owner }}
+      - name: Push image to ghcr.io
+        run: |
+          podman manifest create ghcr.io/${{ github.repository }}:${{ github.sha }}
+          for artifact in *-build/result; do
+            tag=$(podman load --input=$artifact | grep -Go "localhost/.*:.*")
+            podman manifest add ghcr.io/${{ github.repository }}:${{ github.sha }} containers-storage:$tag
+          done
+          podman manifest push --format=oci --all ghcr.io/${{ github.repository }}:${{ github.sha }}
