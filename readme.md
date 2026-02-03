@@ -22,3 +22,9 @@ Discotel utilizes the OpenTelemtry SDK to some extent and therefore relies on su
 [`OTEL_EXPORTER_OTLP_ENDPOINT`](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#otel_exporter_otlp_endpoint) – Base HTTP base endpoint to export logs to.
 
 [`OTEL_EXPORTER_OTLP_LOGS_HEADERS`](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/#otel_exporter_otlp_headers) – HTTP Headers sent with the logs. This may be used for authenticating the request.
+
+## Deployment
+
+### Cointaners
+
+NixOS-based OCI container images are provided in the GitHub Container Registry: `ghcr.io/majkrzak/discotel`.
